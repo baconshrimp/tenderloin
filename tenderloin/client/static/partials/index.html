@@ -1,1 +1,11 @@
 <h1 ng-bind="tenderloin"></h1>
+
+<p ng-show="opened">socket is open</p>
+
+<form ng-submit="send(message)">
+  <input ng-model="message">
+  <input type="submit" value="Send">
+  <ol>
+    <li ng-repeat="msg in msgs" ng-bind="msg.message"></li>
+  </ol>
+</form>
