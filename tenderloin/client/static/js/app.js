@@ -7,11 +7,11 @@
   this.config(function($routeProvider) {
     $routeProvider.when('/', {
       controller: 'IndexCtrl',
-      templateUrl: '/static/partials/index.html'
+      templateUrl: '/partials/index.html'
     });
 
     $routeProvider.when('/404', {
-      templateUrl: '/static/partials/404.html'
+      templateUrl: '/partials/404.html'
     });
 
     $routeProvider.otherwise({
