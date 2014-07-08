@@ -7,6 +7,8 @@ from tornado.options import define, options
 import tornado.ioloop
 import tornado.web
 
+from tenderloin.web.chat import ChatHandler
+
 BASE_PATH = os.path.dirname(os.path.dirname(__file__))
 
 define("port", default=8000, help="run on the given port", type=int)
@@ -26,6 +28,7 @@ def get_application():
     static_config = {'path': static_path}
 
     application = tornado.web.Application([
+        (r"/api/chat", ChatHandler),
         (r"/(.*\..*)", tornado.web.StaticFileHandler, static_config),
         (r"/(.*)", SingleFileHandler, static_config),
     ])
