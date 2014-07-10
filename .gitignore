@@ -3,3 +3,4 @@
 *.sqlite3
 *.db
 *.swp
+__pycache__/
