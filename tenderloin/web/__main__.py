@@ -8,6 +8,7 @@ import tornado.ioloop
 import tornado.web
 
 from tenderloin.web.chat import ChatHandler
+from tenderloin.db import initialize_db, User
 
 BASE_PATH = os.path.dirname(os.path.dirname(__file__))
 
@@ -26,6 +27,13 @@ class SingleFileHandler(tornado.web.StaticFileHandler):
 def get_application():
     static_path = os.path.join(BASE_PATH, 'client', 'static')
     static_config = {'path': static_path}
+
+    api_config = {'create_session': initialize_db()}
+
+    # TODO: Add a flag to create these example users
+    with api_config['create_session']() as session:
+        session.add(User('mtomwing', 'foobar'))
+        session.add(User('yandongy', 'pebkac'))
 
     application = tornado.web.Application([
         (r"/api/chat", ChatHandler),
