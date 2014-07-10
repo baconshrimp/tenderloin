@@ -9,9 +9,13 @@
 </form>
 
 <form ng-submit="send(message)">
+  <ol>
+    <li ng-repeat="msg in msgs">
+      <strong>{{msg.username}}</strong>
+      <span ng-if="msg.message">said: {{msg.message}}</span>
+      <span ng-if="!msg.message">has: {{msg.type}}ed</span>
+    </li>
+  </ol>
   <input ng-model="message">
   <input type="submit" value="Send">
-  <ol>
-    <li ng-repeat="msg in msgs" ng-bind="msg.message"></li>
-  </ol>
 </form>
