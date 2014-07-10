@@ -1,8 +1,10 @@
 (function() {
 
-  this.controller('IndexCtrl', function($scope) {
+  this.controller('IndexCtrl', function($scope, User) {
     $scope.tenderloin = 'tenderloin';
     $scope.msgs = [];
+
+    $scope.User = User;
 
     var ws = new WebSocket('ws://' + location.host + '/api/chat');
 

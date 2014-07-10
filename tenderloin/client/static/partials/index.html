@@ -2,6 +2,12 @@
 
 <p ng-show="opened">socket is open</p>
 
+<form ng-submit="User.login(username, password)">
+  <input placeholder="Username" ng-model="username">
+  <input placeholder="Password" ng-model="password" type="password">
+  <input value="Login" type="submit">
+</form>
+
 <form ng-submit="send(message)">
   <input ng-model="message">
   <input type="submit" value="Send">

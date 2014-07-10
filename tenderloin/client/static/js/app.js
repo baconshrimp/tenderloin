@@ -19,12 +19,47 @@
     });
   });
 
-  this.run(function(Restangular) {
-    console.log(Restangular);
+  this.config(function(RestangularProvider) {
+    RestangularProvider.setBaseUrl('/api');
+  });
+
+  this.config(function($httpProvider) {
+    $httpProvider.interceptors.push(function($q) {
+      return {
+        request: function(config) {
+          return config;
+        },
+        requestError: function(rejection) {
+          return $q.reject(rejection);
+        },
+        response: function(response) {
+          return response;
+        },
+        responseError: function(rejection) {
+          return $q.reject(rejection);
+        }
+      };
+    });
+  });
+
+  this.run(function($rootScope, $location) {
+    $rootScope.$on('$login', function() {
+    });
+
+    $rootScope.$on('$routeChangeStart', function() {
+    });
+
+    $rootScope.$on('$routeChangeError', function() {
+      $location.path('/404');
+    });
+
+    $rootScope.$on('$routeChangeSuccess', function() {
+    });
   });
 
 }).call(angular.module('tenderloin', [
   'ngRoute',
   'restangular',
-  'controllers'
+  'controllers',
+  'services'
 ]));
