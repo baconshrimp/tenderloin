@@ -7,9 +7,8 @@ from tornado.options import define, options
 import tornado.ioloop
 import tornado.web
 
-from tenderloin.web.chat import ChatHandler
 from tenderloin.db import initialize_db, User
-from tenderloin.web import auth
+from tenderloin.web import auth, chat
 
 BASE_PATH = os.path.dirname(os.path.dirname(__file__))
 
@@ -38,9 +37,11 @@ def get_application():
         session.add(User('yandongy', 'pebkac'))
 
     application = tornado.web.Application([
-        (r"/api/chat", ChatHandler),
         # HTTP API
         (r'/api/login', auth.LoginHandler, api_config),
+
+        # Websocket API
+        (r'/api/chat', chat.ChatHandler),
 
         (r'/(.*\..*)', tornado.web.StaticFileHandler, static_config),
         (r'/(.*)', SingleFileHandler, static_config),
