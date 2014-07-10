@@ -9,13 +9,13 @@
 </form>
 
 <form ng-submit="send(message)">
-  <ol>
+  <ol reversed>
     <li ng-repeat="msg in msgs">
       <strong>{{msg.username}}</strong>
       <span ng-if="msg.message">said: {{msg.message}}</span>
       <span ng-if="!msg.message">has: {{msg.type}}ed</span>
     </li>
   </ol>
-  <input ng-model="message">
+  <input autofocus ng-model="message">
   <input type="submit" value="Send">
 </form>

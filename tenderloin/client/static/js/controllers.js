@@ -17,13 +17,14 @@
             message: msg
           }
           ws.send(JSON.stringify(obj));
+          $scope.message = '';
         };
       });
     }
 
     ws.onmessage = function(ev) {
       $scope.$apply(function() {
-        $scope.msgs.push(JSON.parse(ev.data));
+        $scope.msgs.unshift(JSON.parse(ev.data));
       });
     }
   });
