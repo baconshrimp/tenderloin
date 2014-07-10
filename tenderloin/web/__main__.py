@@ -9,6 +9,7 @@ import tornado.web
 
 from tenderloin.web.chat import ChatHandler
 from tenderloin.db import initialize_db, User
+from tenderloin.web import auth
 
 BASE_PATH = os.path.dirname(os.path.dirname(__file__))
 
@@ -29,6 +30,7 @@ def get_application():
     static_config = {'path': static_path}
 
     api_config = {'create_session': initialize_db()}
+    app_config = {'cookie_secret': 'changeme'}
 
     # TODO: Add a flag to create these example users
     with api_config['create_session']() as session:
@@ -37,9 +39,12 @@ def get_application():
 
     application = tornado.web.Application([
         (r"/api/chat", ChatHandler),
-        (r"/(.*\..*)", tornado.web.StaticFileHandler, static_config),
-        (r"/(.*)", SingleFileHandler, static_config),
-    ])
+        # HTTP API
+        (r'/api/login', auth.LoginHandler, api_config),
+
+        (r'/(.*\..*)', tornado.web.StaticFileHandler, static_config),
+        (r'/(.*)', SingleFileHandler, static_config),
+    ], **app_config)
     return application
 
 
