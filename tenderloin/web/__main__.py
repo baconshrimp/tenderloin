@@ -8,6 +8,7 @@ import tornado.ioloop
 import tornado.web
 
 from tenderloin.db import initialize_db, User
+from tenderloin.game.table import TableService
 from tenderloin.web import auth, chat, game
 
 BASE_PATH = os.path.dirname(os.path.dirname(__file__))
@@ -28,7 +29,10 @@ def get_application():
     static_path = os.path.join(BASE_PATH, 'client', 'static')
     static_config = {'path': static_path}
 
-    api_config = {'create_session': initialize_db()}
+    api_config = {
+        'create_session': initialize_db(),
+        'table_service': TableService(),
+    }
     app_config = {'cookie_secret': 'changeme'}
 
     # TODO: Add a flag to create these example users
@@ -43,10 +47,10 @@ def get_application():
         (r'/api/login', auth.LoginHandler, api_config),
 
         # Chat API
-        (r'/api/chat', chat.ChatHandler),
+        (r'/api/chat', chat.ChatHandler, api_config),
 
         # Game API
-        (r'/api/table/(?P<tid>\d+)', game.TableHandler),
+        (r'/api/table/(?P<tid>\d+)', game.TableHandler, api_config),
 
         (r'/(.*\..*)', tornado.web.StaticFileHandler, static_config),
         (r'/(.*)', SingleFileHandler, static_config),
