@@ -58,7 +58,7 @@ class Table(object):
             handler.write_message(message)
 
     def send_info(self, username):
-        hand = sorted(self.players[username]['hand'])
+        hand = sorted(self.players[username]['hand'], key=tiles.get)
         wind = self.players[username]['wind']
 
         self.send_message('info', username, {
