@@ -29,7 +29,7 @@
         (function(id) {
           var ws = new WebSocket('ws://' + location.host + '/api/table/' + id);
 
-          ws.onopen = function() {
+          ws.onopen = function(ev) {
             $scope.$apply(function() {
               $scope.game = true;
               $scope.game_id = id;
@@ -38,6 +38,11 @@
 
           ws.onmessage = function(ev) {
             var data = JSON.parse(ev.data);
+            if (data.type === 'hand') {
+              $scope.$apply(function() {
+                $scope.hand = data.hand;
+              });
+            }
             console.log('from game: ', data);
           };
         }).call(_, data.id);
