@@ -12,8 +12,8 @@
   <h2>Game, id: {{game_id}}</h2>
   <div ng-show="hand">
     <h3>Hand</h3>
-    <ul ng-repeat="tile in hand track by $index">
-      <li ng-bind="tile" class="tile"></li>
+    <ul>
+      <li ng-repeat="tile in hand track by $index" class="tile">{{tile}}</li>
     </ul>
   </div>
 </div>

@@ -8,4 +8,5 @@
 .tile {
   font-family: 'FreeSerif';
   font-size: 10em;
+  display: inline-block;
 }
