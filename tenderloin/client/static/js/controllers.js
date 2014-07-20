@@ -45,7 +45,7 @@
 
           ws.onmessage = function(ev) {
             var data = JSON.parse(ev.data);
-            if (data.type === 'hand') {
+            if (data.type === 'info') {
               $scope.$apply(function() {
                 $scope.hand = data.unicode;
               });
