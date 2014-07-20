@@ -1,7 +1,7 @@
 import collections
 import random
 
-from tenderloin.game.resources import tiles, deck
+from tenderloin.game.resources import tiles, deck, winds
 
 
 class TableService(object):
@@ -24,6 +24,7 @@ class Table(object):
         # Some housekeeping
         self.has_started = False
         self.tid = tid
+        random.shuffle(usernames)
 
         # Create the deck
         self.deck = collections.deque(deck)
@@ -32,11 +33,11 @@ class Table(object):
         # Setup the players
         self.players = collections.OrderedDict()
         self.has_joined_once = {}
-        for username in usernames:
+        for username, wind in zip(usernames, winds):
             self.players[username] = {
                 'hand': [],
                 'flowers': [],
-                'wind': None,
+                'wind': wind,
                 'listeners': set(),
             }
             self.has_joined_once[username] = False
@@ -56,9 +57,16 @@ class Table(object):
         for handler in self.players[username]['listeners']:
             handler.write_message(message)
 
-    def send_hand(self, username):
-        hand = self.players[username]['hand']
-        self.send_message('hand', username, {
+    def send_info(self, username):
+        hand = sorted(self.players[username]['hand'])
+        wind = self.players[username]['wind']
+
+        self.send_message('info', username, {
+            'players': [{
+                'username': player,
+                'wind': info['wind'],
+            } for player, info in self.players.items()],
+            'wind': wind,
             'hand': hand,
             'unicode': [tiles[tile] for tile in hand],
         })
@@ -87,4 +95,4 @@ class Table(object):
         for username in self.players:
             self.players[username]['hand'] = \
                 [self.deck.popleft() for _ in range(13)]
-            self.send_hand(username)
+            self.send_info(username)

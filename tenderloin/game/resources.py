@@ -47,3 +47,5 @@ deck = (
     [tile for tile in tiles.keys() if not tile.startswith('flower')] * 4
     + [tile for tile in tiles.keys() if tile.startswith('flower')]
 )
+
+winds = ['east', 'south', 'west', 'north']
