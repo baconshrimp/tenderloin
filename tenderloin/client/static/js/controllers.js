@@ -34,6 +34,13 @@
               $scope.game = true;
               $scope.game_id = id;
             });
+
+            $scope.discard = function(tile) {
+              ws.send(JSON.stringify({
+                name: "discard",
+                tile: tile
+              }));
+            };
           };
 
           ws.onmessage = function(ev) {

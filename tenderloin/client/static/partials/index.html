@@ -13,7 +13,10 @@
   <div ng-show="hand">
     <h3>Hand</h3>
     <ul>
-      <li ng-repeat="tile in hand track by $index" class="tile">{{tile}}</li>
+      <li
+        ng-repeat="tile in hand track by $index"
+        class="tile"
+        ng-click="discard(tile)">{{tile}}</li>
     </ul>
   </div>
 </div>
