@@ -40,7 +40,7 @@
             var data = JSON.parse(ev.data);
             console.log('from game: ', data);
           };
-        }).call(data.id);
+        }).call(_, data.id);
       }
 
       $scope.$apply(function() {
