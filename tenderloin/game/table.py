@@ -1,6 +1,8 @@
 import collections
 import random
 
+from tenderloin.game.resources import tiles, deck
+
 
 class TableService(object):
 
@@ -24,14 +26,7 @@ class Table(object):
         self.tid = tid
 
         # Create the deck
-        self.deck = collections.deque(
-            ['character-{}'.format(i) for i in range(1, 10)] * 4
-            + ['circle-{}'.format(i) for i in range(1, 10)] * 4
-            + ['bamboo-{}'.format(i) for i in range(1, 10)] * 4
-            + ['dragon-red', 'dragon-green', 'dragon-white'] * 4
-            + ['wind-north', 'wind-east', 'wind-south', 'wind--west'] * 4
-            + ['flower-1', 'flower-2', 'flower-3', 'flower-4'] * 2
-        )
+        self.deck = collections.deque(deck)
         random.shuffle(self.deck)
 
         # Setup the players
@@ -61,6 +56,13 @@ class Table(object):
         for handler in self.players[username]['listeners']:
             handler.write_message(message)
 
+    def send_hand(self, username):
+        hand = self.players[username]['hand']
+        self.send_message('hand', username, {
+            'hand': hand,
+            'unicode': [tiles[tile] for tile in hand],
+        })
+
     def broadcast_message(self, type_, message):
         message.update({'type': type_})
         for username in self.players:
@@ -77,6 +79,4 @@ class Table(object):
         for username in self.players:
             self.players[username]['hand'] = \
                 [self.deck.popleft() for _ in range(13)]
-            self.send_message('hand', username, {
-                'hand': self.players[username]['hand'],
-            })
+            self.send_hand(username)

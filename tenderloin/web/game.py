@@ -16,6 +16,7 @@ class TableHandler(helper.TenderloinWebSocketHandler):
         logger.info('%s has connected to table %s', self.username, tid)
 
         if self.table.can_start():
+            logger.info('Starting table %s', tid)
             self.table.start_game()
 
     def on_close(self):
