@@ -8,7 +8,7 @@ import tornado.ioloop
 import tornado.web
 
 from tenderloin.db import initialize_db, User
-from tenderloin.web import auth, chat
+from tenderloin.web import auth, chat, game
 
 BASE_PATH = os.path.dirname(os.path.dirname(__file__))
 
@@ -33,15 +33,20 @@ def get_application():
 
     # TODO: Add a flag to create these example users
     with api_config['create_session']() as session:
-        session.add(User('mtomwing', 'foobar'))
-        session.add(User('yandongy', 'pebkac'))
+        session.add(User('michael', 'michael'))
+        session.add(User('david', 'david'))
+        session.add(User('tom', 'tom'))
+        session.add(User('allen', 'allen'))
 
     application = tornado.web.Application([
         # HTTP API
         (r'/api/login', auth.LoginHandler, api_config),
 
-        # Websocket API
+        # Chat API
         (r'/api/chat', chat.ChatHandler),
+
+        # Game API
+        (r'/api/table/(?P<tid>\d+)', game.TableHandler),
 
         (r'/(.*\..*)', tornado.web.StaticFileHandler, static_config),
         (r'/(.*)', SingleFileHandler, static_config),
