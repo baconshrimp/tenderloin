@@ -63,6 +63,14 @@ class Table(object):
             'unicode': [tiles[tile] for tile in hand],
         })
 
+    def draw_tile(self, username):
+        tile = self.deck.popleft()
+        self.players[username]['hand'].append(tile)
+        self.send_message('draw', username, {
+            'tile': tile,
+            'unicode': tiles[tile],
+        })
+
     def broadcast_message(self, type_, message):
         message.update({'type': type_})
         for username in self.players:
@@ -70,7 +78,7 @@ class Table(object):
                 handler.write_message(message)
 
     def can_start(self):
-        return not self.has_started or all(self.has_joined_once.values())
+        return not self.has_started and all(self.has_joined_once.values())
 
     def start_game(self):
         self.has_started = True

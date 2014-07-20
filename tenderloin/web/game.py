@@ -16,8 +16,15 @@ class TableHandler(helper.TenderloinWebSocketHandler):
         logger.info('%s has connected to table %s', self.username, tid)
 
         if self.table.can_start():
-            logger.info('Starting table %s', tid)
+            logger.info('%s is starting table %s', self.username, tid)
             self.table.start_game()
+
+            # Make everyone draw once
+            for username in self.table.players:
+                self.table.draw_tile(username)
+
+    def on_message(self, message):
+        logger.log('Got message from %s: %s', self.username, message)
 
     def on_close(self):
         self.table.remove_client(self.username, self)
