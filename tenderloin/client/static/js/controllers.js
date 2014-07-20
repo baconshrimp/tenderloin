@@ -40,7 +40,7 @@
             var data = JSON.parse(ev.data);
             if (data.type === 'hand') {
               $scope.$apply(function() {
-                $scope.hand = data.hand;
+                $scope.hand = data.unicode;
               });
             }
             console.log('from game: ', data);
