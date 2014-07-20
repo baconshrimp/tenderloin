@@ -12,7 +12,7 @@
   <h2>Game, id: {{id}}</h2>
   <div ng-show="hand">
     <h3>Hand</h3>
-    <ul ng-repeat="tile in hand">
+    <ul ng-repeat="tile in hand track by $index">
       <li ng-bind="tile"></li>
     </ul>
   </div>
