@@ -12,11 +12,14 @@ class TableHandler(helper.TenderloinWebSocketHandler):
     @helper.requires_authentication
     def open(self, tid):
         self.table = self.table_service.get(int(tid))
+        self.table.add_client(self.username, self)
         logger.info('%s has connected to table %s', self.username, tid)
 
-        self.write_message({
-            'type': 'hand',
-            'username': self.username,
-            'hand': self.table.hands[self.username],
-        })
-        logger.info('Gave %s their hand of 13 tiles', self.username)
+        if self.table.can_start():
+            self.table.start_game()
+
+    def on_close(self):
+        self.table.remove_client(self.username, self)
+        logger.info('%s has disconnected from table %s',
+                    self.username,
+                    self.table.tid)
