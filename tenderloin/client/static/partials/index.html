@@ -8,6 +8,10 @@
   <input value="Login" type="submit">
 </form>
 
+<div ng-show="game">
+  <h2>Game, id: {{id}}</h2>
+</div>
+
 <form ng-submit="send(message)">
   <ol reversed>
     <li ng-repeat="msg in msgs">

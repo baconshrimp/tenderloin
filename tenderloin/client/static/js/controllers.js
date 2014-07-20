@@ -23,8 +23,28 @@
     }
 
     ws.onmessage = function(ev) {
+      var data = JSON.parse(ev.data);
+
+      if (data.type === 'new_game') {
+        (function(id) {
+          var ws = new WebSocket('ws://' + location.host + '/api/table/' + id);
+
+          ws.onopen = function() {
+            $scope.$apply(function() {
+              $scope.game = true;
+              $scope.game_id = id;
+            });
+          };
+
+          ws.onmessage = function(ev) {
+            var data = JSON.parse(ev.data);
+            console.log('from game: ', data);
+          };
+        }).call(data.id);
+      }
+
       $scope.$apply(function() {
-        $scope.msgs.unshift(JSON.parse(ev.data));
+        $scope.msgs.unshift(data);
       });
     }
   });
