@@ -24,7 +24,7 @@ class TableHandler(helper.TenderloinWebSocketHandler):
                 self.table.draw_tile(username)
 
     def on_message(self, message):
-        logger.log('Got message from %s: %s', self.username, message)
+        logger.info('Got message from %s: %s', self.username, message)
 
     def on_close(self):
         self.table.remove_client(self.username, self)
