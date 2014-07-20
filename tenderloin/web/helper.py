@@ -41,8 +41,10 @@ def parse_json_or_fail(message, schema):
 
 class TenderloinRequestHandler(tornado.web.RequestHandler):
 
-    def initialize(self, create_session):
+    def initialize(self, create_session, table_service):
         self.create_session = create_session
+        self.table_service = table_service
+        self.username = self.get_current_username()
 
     def write_error(self, status_code, **kwargs):
         error = kwargs['exc_info'][1]
@@ -65,6 +67,11 @@ class TenderloinRequestHandler(tornado.web.RequestHandler):
 
 
 class TenderloinWebSocketHandler(tornado.websocket.WebSocketHandler):
+
+    def initialize(self, create_session, table_service):
+        self.create_session = create_session
+        self.table_service = table_service
+        self.username = self.get_current_username()
 
     def write_error(self, reason):
         """Sends an error message to the client."""
