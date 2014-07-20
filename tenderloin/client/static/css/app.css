@@ -1,0 +1,10 @@
+@font-face {
+  font-family: 'FreeSerif';
+  font-style: normal;
+  font-weight: 400;
+  src: url(freefont-20120503/FreeSerif.woff) format('woff');
+}
+
+.tile {
+  font-family: 'FreeSerif';
+}
