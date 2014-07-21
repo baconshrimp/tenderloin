@@ -37,7 +37,7 @@
 
             $scope.discard = function(tile) {
               ws.send(JSON.stringify({
-                name: "discard",
+                type: "discard",
                 tile: tile
               }));
             };
