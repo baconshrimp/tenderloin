@@ -33,19 +33,19 @@ tiles = {
     'circles-7': '\N{MAHJONG TILE SEVEN OF CIRCLES}',
     'circles-8': '\N{MAHJONG TILE EIGHT OF CIRCLES}',
     'circles-9': '\N{MAHJONG TILE NINE OF CIRCLES}',
-    'flower-plum': '\N{MAHJONG TILE PLUM}',
-    'flower-orchid': '\N{MAHJONG TILE ORCHID}',
-    'flower-bamboo': '\N{MAHJONG TILE BAMBOO}',
-    'flower-chrysanthemum': '\N{MAHJONG TILE CHRYSANTHEMUM}',
-    'flower-spring': '\N{MAHJONG TILE SPRING}',
-    'flower-summer': '\N{MAHJONG TILE SUMMER}',
-    'flower-autumn': '\N{MAHJONG TILE AUTUMN}',
-    'flower-winter': '\N{MAHJONG TILE WINTER}',
+    # 'flower-plum': '\N{MAHJONG TILE PLUM}',
+    # 'flower-orchid': '\N{MAHJONG TILE ORCHID}',
+    # 'flower-bamboo': '\N{MAHJONG TILE BAMBOO}',
+    # 'flower-chrysanthemum': '\N{MAHJONG TILE CHRYSANTHEMUM}',
+    # 'flower-spring': '\N{MAHJONG TILE SPRING}',
+    # 'flower-summer': '\N{MAHJONG TILE SUMMER}',
+    # 'flower-autumn': '\N{MAHJONG TILE AUTUMN}',
+    # 'flower-winter': '\N{MAHJONG TILE WINTER}',
 }
 
 deck = (
     [tile for tile in tiles.keys() if not tile.startswith('flower')] * 4
-    + [tile for tile in tiles.keys() if tile.startswith('flower')]
+    # + [tile for tile in tiles.keys() if tile.startswith('flower')]
 )
 
 winds = ['east', 'south', 'west', 'north']
