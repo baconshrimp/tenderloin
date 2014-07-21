@@ -78,7 +78,8 @@ class Table(object):
 
         random.shuffle(usernames)
         self.game = Game(usernames)
-        self.last_tick = 0
+        self.last_turn_start = 0
+        self.turn_time = 30  # seconds
 
     def add_client(self, username, handler):
         logger.info('Table %s: listener added for %s', self.tid, username)
@@ -142,6 +143,12 @@ class Table(object):
 
         logger.info('Table %s: tick from %s', self.tid, username)
 
+        time_since = time.time() - self.last_turn_start
+        turns_since, remainder = divmod(time_since, self.turn_time)
+        if turns_since > 0:
+            logger.info('Table %s: behind by %s turns', self.tid, turns_since)
+            self.last_turn_start = time.time() - remainder
+
     def start_game(self):
         logger.info('Table %s: starting', self.tid)
         self.has_started = True
@@ -150,3 +157,5 @@ class Table(object):
         # Tell everyone about their hand
         for username in self.listeners:
             self.send_info(username)
+
+        self.last_turn_start = time.time()
