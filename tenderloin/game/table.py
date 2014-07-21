@@ -117,6 +117,7 @@ class Table(object):
             } for player in self.game.players.values()],
             'hand': hand,
             'unicode': [tiles[tile] for tile in hand],
+            'turn_time': self.turn_time,
         })
 
     # Message receiving
