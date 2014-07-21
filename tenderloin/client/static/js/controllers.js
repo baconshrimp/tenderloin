@@ -49,6 +49,17 @@
               $scope.$apply(function() {
                 $scope.hand = data.unicode;
               });
+
+              function tick() {
+                _.delay(function() {
+                  ws.send(JSON.stringify({
+                    type: "tick"
+                  }));
+                  tick();
+                }, 500 * parseInt(data.turn_time, 10));
+              }
+
+              tick();
             }
             console.log('from game: ', data);
           };
