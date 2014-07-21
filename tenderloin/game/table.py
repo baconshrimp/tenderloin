@@ -1,7 +1,54 @@
 import collections
+import itertools
 import random
 
 from tenderloin.game.resources import tiles, deck, winds
+
+
+Player = collections.namedtuple('Player', [
+    'username',
+    'hand',
+    'flowers',
+    'wind',
+])
+
+
+class Game(object):
+
+    def __init__(self, usernames):
+        self.deck = collections.deque(deck)
+        self.players = self._create_players(usernames)
+        random.shuffle(self.deck)
+        self.turn_order = itertools.cycle(usernames)
+
+    def _create_players(self, usernames):
+        players = {}
+        for username, wind in zip(usernames, winds):
+            players[username] = Player(
+                username=username,
+                hand=[],
+                flowers=[],
+                wind=wind,
+            )
+        return players
+
+    def draw_tile(self, username):
+        """Draws a tile for a player."""
+        tile = self.deck.popleft()
+        self.players[username].append(tile)
+        return tile
+
+    def start(self):
+        """Deals hands and starts the game."""
+        for username in self.players:
+            self.players[username].hand.extend(
+                [self.deck.popleft() for _ in range(13)])
+
+    def next_turn(self):
+        """Advances the game state by one turn."""
+        username = next(self.turn_order)
+        tile = self.draw_tile(username)
+        return username, tile
 
 
 class TableService(object):
@@ -21,78 +68,61 @@ class TableService(object):
 class Table(object):
 
     def __init__(self, tid, usernames):
-        # Some housekeeping
-        self.has_started = False
         self.tid = tid
+        self.has_started = False
+        self.has_joined_once = {username: False for username in usernames}
+        self.listeners = {username: set() for username in usernames}
+
         random.shuffle(usernames)
-
-        # Create the deck
-        self.deck = collections.deque(deck)
-        random.shuffle(self.deck)
-
-        # Setup the players
-        self.players = collections.OrderedDict()
-        self.has_joined_once = {}
-        for username, wind in zip(usernames, winds):
-            self.players[username] = {
-                'hand': [],
-                'flowers': [],
-                'wind': wind,
-                'listeners': set(),
-            }
-            self.has_joined_once[username] = False
+        self.game = Game(usernames)
 
     def add_client(self, username, handler):
-        self.players[username]['listeners'].add(handler)
+        self.listeners[username].add(handler)
         self.has_joined_once[username] = True
 
     def remove_client(self, username, handler):
-        self.players[username]['listeners'].remove(handler)
+        self.listeners[username].remove(handler)
 
-    def send_message(self, type_, username, message):
+    def _send_message(self, type_, username, message):
+        """Send a message to all listeners on a username."""
         message.update({
             'type': type_,
             'username': username,
         })
-        for handler in self.players[username]['listeners']:
-            handler.write_message(message)
+        for listener in self.listeners[username]:
+            listener.write_message(message)
+
+    def _broadcast_message(self, type_, message):
+        """Send a message to all listeners on any username."""
+        message.update({'type': type_})
+        for listener in itertools.chain(*self.listeners.values()):
+            listener.write_message(message)
+
+    # Message sending
 
     def send_info(self, username):
-        hand = sorted(self.players[username]['hand'], key=tiles.get)
-        wind = self.players[username]['wind']
-
-        self.send_message('info', username, {
+        """Tells a player about their hand and wind."""
+        hand = sorted(self.game.players[username].hand, key=tiles.get)
+        self._send_message('info', username, {
             'players': [{
-                'username': player,
-                'wind': info['wind'],
-            } for player, info in self.players.items()],
-            'wind': wind,
+                'username': player.username,
+                'wind': player.wind,
+            } for player in self.game.players.values()],
             'hand': hand,
             'unicode': [tiles[tile] for tile in hand],
         })
 
-    def draw_tile(self, username):
-        tile = self.deck.popleft()
-        self.players[username]['hand'].append(tile)
-        self.send_message('draw', username, {
-            'tile': tile,
-            'unicode': tiles[tile],
-        })
-
-    def broadcast_message(self, type_, message):
-        message.update({'type': type_})
-        for username in self.players:
-            for handler in self.players[username]['listeners']:
-                handler.write_message(message)
+    # Game state
 
     def can_start(self):
         return not self.has_started and all(self.has_joined_once.values())
 
+    # Game actions
+
     def start_game(self):
         self.has_started = True
+        self.game.start()
 
-        # Deal tiles
-        for username in self.players:
-            self.players[username]['hand'] = \
-                [self.deck.popleft() for _ in range(13)]
+        # Tell everyone about their hand
+        for username in self.listeners:
             self.send_info(username)
