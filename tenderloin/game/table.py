@@ -1,9 +1,12 @@
 import collections
 import itertools
+import logging
 import random
+import time
 
 from tenderloin.game.resources import tiles, deck, winds
 
+logger = logging.getLogger(__name__)
 
 Player = collections.namedtuple('Player', [
     'username',
@@ -75,12 +78,15 @@ class Table(object):
 
         random.shuffle(usernames)
         self.game = Game(usernames)
+        self.last_tick = 0
 
     def add_client(self, username, handler):
+        logger.info('Table %s: listener added for %s', self.tid, username)
         self.listeners[username].add(handler)
         self.has_joined_once[username] = True
 
     def remove_client(self, username, handler):
+        logger.info('Table %s: listener removed for %s', self.tid, username)
         self.listeners[username].remove(handler)
 
     def _send_message(self, type_, username, message):
@@ -112,6 +118,17 @@ class Table(object):
             'unicode': [tiles[tile] for tile in hand],
         })
 
+    # Message receiving
+
+    def handle(self, username, message):
+        if message['type'] == 'tick':
+            return
+
+        logger.info('Table %s: processing %r from %s',
+                    self.tid,
+                    message,
+                    username)
+
     # Game state
 
     def can_start(self):
@@ -119,7 +136,14 @@ class Table(object):
 
     # Game actions
 
+    def tick(self, username):
+        if not self.has_started:
+            return
+
+        logger.info('Table %s: tick from %s', self.tid, username)
+
     def start_game(self):
+        logger.info('Table %s: starting', self.tid)
         self.has_started = True
         self.game.start()
 
