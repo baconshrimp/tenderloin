@@ -40,16 +40,16 @@ class Game(object):
             )
         return players
 
-    def draw_tile(self, username):
+    def draw_tile(self):
         """Draws a tile for a player."""
         tile = self.deck.popleft()
-        self.players[username].hand.append(tile)
+        self.current_player.hand.append(tile)
         return tile
 
-    def discard_tile(self, username, tile):
+    def discard_tile(self, tile):
         """Discards a tile from a player's hand."""
-        self.players[username].hand.remove(tile)
-        self.discards.append((username, tile))
+        self.current_player.hand.remove(tile)
+        self.discards.append((self.current_player.username, tile))
 
     def start(self):
         """Deals hands and starts the game."""
@@ -60,9 +60,8 @@ class Game(object):
     def next_turn(self):
         """Advances the game state by one turn."""
         username = next(self.turn_order)
-        tile = self.draw_tile(username)
-        self.current_player = username
-        return username, tile
+        self.current_player = self.players[username]
+        return username
 
 
 class TableService(object):
@@ -89,10 +88,10 @@ class Table(object):
 
         random.shuffle(usernames)
         self.game = Game(usernames)
-        self.turn_time = 10000  # ms
 
+        self.turn_time = 10000  # ms
         self.turn_number = 0
-        self.turn_timer = PeriodicCallback(self.next_turn, self.turn_time)
+        self.turn_timer = PeriodicCallback(self.end_turn, self.turn_time)
 
     def add_client(self, username, handler):
         logger.info('Table %s: listener added for %s', self.tid, username)
@@ -137,20 +136,22 @@ class Table(object):
         for username in self.listeners:
             self.send_info(username)
 
-    def broadcast_turn_start(self, username, tile):
+    def broadcast_turn_start(self, username):
         self._broadcast_message('turn_start', {
             'username': username,
             'number': self.turn_number,
-        })
-        self._send_message('draw', username, {
-            'tile': tile,
-            'unicode': tiles[tile],
         })
 
     def broadcast_turn_end(self, username):
         self._broadcast_message('turn_end', {
             'username': username,
             'number': self.turn_number,
+        })
+
+    def broadcast_draw(self, username, tile):
+        self._send_message('draw', username, {
+            'tile': tile,
+            'unicode': tiles[tile],
         })
 
     def broadcast_discard(self, username, tile):
@@ -163,7 +164,7 @@ class Table(object):
     # Message receiving
 
     def handle(self, username, message):
-        if self.game.current_player == username:
+        if self.game.current_player.username == username:
             logger.info('Table %s: processing %r from %s',
                         self.tid,
                         message,
@@ -180,12 +181,12 @@ class Table(object):
         tile = reverse_tiles[message['tile']]
 
         try:
-            self.game.discard_tile(username, tile)
+            self.game.discard_tile(tile)
         except ValueError:
             return
 
         self.broadcast_discard(username, tile)
-        self.next_turn()
+        self.end_turn()
 
     # Game state
 
@@ -195,22 +196,33 @@ class Table(object):
     # Game actions
 
     def start_game(self):
-        logger.info('Table %s: starting', self.tid)
+        logger.info('Table %s: starting game', self.tid)
         self.has_started = True
         self.game.start()
 
         self.broadcast_info()
-        self.next_turn()
+        self.start_turn()
 
-    def next_turn(self):
-        self.turn_timer.stop()
+    def start_turn(self, draw=True):
+        """Start the next player's turn."""
         self.turn_number += 1
-        if len(self.game.deck):
-            logger.info('Table %s: starting turn %s',
-                        self.tid,
-                        self.turn_number)
-            username, tile = self.game.next_turn()
-            self.broadcast_turn_start(username, tile)
-            self.turn_timer.start()
+        logger.info('Table %s: starting turn %s',
+                    self.tid,
+                    self.turn_number)
+
+        username = self.game.next_turn()
+        self.broadcast_turn_start(username)
+
+        if draw:
+            tile = self.game.draw_tile()
+            self.broadcast_draw(username, tile)
+
+        self.turn_timer.start()
+
+    def end_turn(self):
+        """Ends the current player's turn."""
+        self.turn_timer.stop()
+        if self.game.deck:
+            self.start_turn()
         else:
-            logger.info('Table %s: deck depleted', self.tid)
+            logger.info('Table %s: deck depleted, timers stopped', self.tid)
