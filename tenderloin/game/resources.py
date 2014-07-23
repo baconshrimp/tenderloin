@@ -42,6 +42,7 @@ tiles = {
     # 'flower-autumn': '\N{MAHJONG TILE AUTUMN}',
     # 'flower-winter': '\N{MAHJONG TILE WINTER}',
 }
+reverse_tiles = dict((value, key) for key, value in tiles.items())
 
 deck = (
     [tile for tile in tiles.keys() if not tile.startswith('flower')] * 4

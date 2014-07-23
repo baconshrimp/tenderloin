@@ -2,8 +2,6 @@
 
 import logging
 
-import tornado.escape
-
 from tenderloin.web import helper
 
 logger = logging.getLogger(__name__)
@@ -29,7 +27,6 @@ class TableHandler(helper.TenderloinWebSocketHandler):
 
     def on_message(self, raw_message):
         message = helper.parse_json_or_fail(raw_message, self.GENERAL_SCHEMA)
-        self.table.tick(self.username)
         self.table.handle(self.username, message)
 
     def on_close(self):
