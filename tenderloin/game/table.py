@@ -222,6 +222,7 @@ class Table(object):
     def end_turn(self):
         """Ends the current player's turn."""
         self.turn_timer.stop()
+        self.broadcast_turn_end(self.game.current_player.username)
         if self.game.deck:
             self.start_turn()
         else:
