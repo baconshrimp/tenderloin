@@ -90,8 +90,11 @@ class Table(object):
         self.game = Game(usernames)
 
         self.turn_time = 10000  # ms
-        self.turn_number = 0
+        self.turn_number = 1
         self.turn_timer = PeriodicCallback(self.end_turn, self.turn_time)
+
+        self.pick_time = 5000  # ms
+        self.pick_timer = PeriodicCallback(self.end_pick, self.pick_time)
 
     def add_client(self, username, handler):
         logger.info('Table %s: listener added for %s', self.tid, username)
@@ -136,10 +139,22 @@ class Table(object):
         for username in self.listeners:
             self.send_info(username)
 
+    def broadcast_pick_start(self):
+        self._broadcast_message('start_pick', {
+            'number': self.turn_number,
+            'pick_time': self.pick_time,
+        })
+
+    def broadcast_pick_end(self):
+        self._broadcast_message('end_pick', {
+            'number': self.turn_number,
+        })
+
     def broadcast_turn_start(self, username):
         self._broadcast_message('start_turn', {
             'username': username,
             'number': self.turn_number,
+            'turn_time': self.turn_time,
         })
 
     def broadcast_turn_end(self, username):
@@ -203,9 +218,26 @@ class Table(object):
         self.broadcast_info()
         self.start_turn()
 
+    def start_pick(self):
+        """Start the pick phase."""
+        self.turn_number += 1
+        logger.info('Table %s: starting pick %s',
+                    self.tid,
+                    self.turn_number)
+        self.broadcast_pick_start()
+        self.pick_timer.start()
+
+    def end_pick(self):
+        """End the pick phase."""
+        self.pick_timer.stop()
+        logger.info('Table %s: ending pick %s',
+                    self.tid,
+                    self.turn_number)
+        self.broadcast_pick_end()
+        self.start_turn()
+
     def start_turn(self, draw=True):
         """Start the next player's turn."""
-        self.turn_number += 1
         logger.info('Table %s: starting turn %s',
                     self.tid,
                     self.turn_number)
@@ -224,6 +256,6 @@ class Table(object):
         self.turn_timer.stop()
         self.broadcast_turn_end(self.game.current_player.username)
         if self.game.deck:
-            self.start_turn()
+            self.start_pick()
         else:
             logger.info('Table %s: deck depleted, timers stopped', self.tid)
