@@ -137,13 +137,13 @@ class Table(object):
             self.send_info(username)
 
     def broadcast_turn_start(self, username):
-        self._broadcast_message('turn_start', {
+        self._broadcast_message('start_turn', {
             'username': username,
             'number': self.turn_number,
         })
 
     def broadcast_turn_end(self, username):
-        self._broadcast_message('turn_end', {
+        self._broadcast_message('end_turn', {
             'username': username,
             'number': self.turn_number,
         })
