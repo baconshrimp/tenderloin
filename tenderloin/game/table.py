@@ -92,9 +92,10 @@ class Table(object):
         self.turn_time = 10000  # ms
         self.turn_number = 1
         self.turn_timer = PeriodicCallback(self.end_turn, self.turn_time)
-
         self.pick_time = 5000  # ms
         self.pick_timer = PeriodicCallback(self.end_pick, self.pick_time)
+
+        self.can_discard = False
 
     def add_client(self, username, handler):
         logger.info('Table %s: listener added for %s', self.tid, username)
@@ -184,7 +185,7 @@ class Table(object):
                         self.tid,
                         message,
                         username)
-            if message['type'] == 'discard':
+            if message['type'] == 'discard' and self.can_discard:
                 self.handle_discard(username, message)
         else:
             logger.info('Table %s: ignoring message from %s',
@@ -249,12 +250,14 @@ class Table(object):
             tile = self.game.draw_tile()
             self.broadcast_draw(username, tile)
 
+        self.can_discard = True
         self.turn_timer.start()
 
     def end_turn(self):
         """Ends the current player's turn."""
         self.turn_timer.stop()
         self.broadcast_turn_end(self.game.current_player.username)
+        self.can_discard = False
         if self.game.deck:
             self.start_pick()
         else:
