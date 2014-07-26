@@ -13,7 +13,7 @@ from tenderloin.web import auth, chat, game
 
 BASE_PATH = os.path.dirname(os.path.dirname(__file__))
 
-define("port", default=8000, help="run on the given port", type=int)
+define("port", default=8080, help="run on the given port", type=int)
 
 
 class SingleFileHandler(tornado.web.StaticFileHandler):
