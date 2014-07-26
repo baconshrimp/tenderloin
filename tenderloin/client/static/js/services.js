@@ -18,7 +18,8 @@
     }
 
     return {
-      login: login
+      login: login,
+      getUsername: getUsername
     };
   });
 
