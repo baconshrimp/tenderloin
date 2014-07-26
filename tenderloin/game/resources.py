@@ -1,4 +1,4 @@
-tiles = {
+raw_tiles = {
     'wind-east': '\N{MAHJONG TILE EAST WIND}',
     'wind-south': '\N{MAHJONG TILE SOUTH WIND}',
     'wind-west': '\N{MAHJONG TILE WEST WIND}',
@@ -33,20 +33,73 @@ tiles = {
     'circles-7': '\N{MAHJONG TILE SEVEN OF CIRCLES}',
     'circles-8': '\N{MAHJONG TILE EIGHT OF CIRCLES}',
     'circles-9': '\N{MAHJONG TILE NINE OF CIRCLES}',
-    # 'flower-plum': '\N{MAHJONG TILE PLUM}',
-    # 'flower-orchid': '\N{MAHJONG TILE ORCHID}',
-    # 'flower-bamboo': '\N{MAHJONG TILE BAMBOO}',
-    # 'flower-chrysanthemum': '\N{MAHJONG TILE CHRYSANTHEMUM}',
-    # 'flower-spring': '\N{MAHJONG TILE SPRING}',
-    # 'flower-summer': '\N{MAHJONG TILE SUMMER}',
-    # 'flower-autumn': '\N{MAHJONG TILE AUTUMN}',
-    # 'flower-winter': '\N{MAHJONG TILE WINTER}',
+    'flower-plum': '\N{MAHJONG TILE PLUM}',
+    'flower-orchid': '\N{MAHJONG TILE ORCHID}',
+    'flower-bamboo': '\N{MAHJONG TILE BAMBOO}',
+    'flower-chrysanthemum': '\N{MAHJONG TILE CHRYSANTHEMUM}',
+    'flower-spring': '\N{MAHJONG TILE SPRING}',
+    'flower-summer': '\N{MAHJONG TILE SUMMER}',
+    'flower-autumn': '\N{MAHJONG TILE AUTUMN}',
+    'flower-winter': '\N{MAHJONG TILE WINTER}',
 }
-reverse_tiles = dict((value, key) for key, value in tiles.items())
+
+
+class Tile(object):
+    """Represents a Mahjong tile."""
+
+    def __init__(self, code, symbol):
+        self.code = code
+        self.symbol = symbol
+        self.suite, self.value = code.split('-', 1)
+
+    def __hash__(self):
+        return hash(self.symbol)
+
+    def __eq__(self, other):
+        return self.symbol == other.symbol
+
+    def __lt__(self, other):
+        return self.symbol < other.symbol
+
+
+class NumericTile(Tile):
+    """Represents a numeric Mahjong tile."""
+
+    def __init__(self, code, symbol):
+        super(NumericTile, self).__init__(code, symbol)
+        self.value = int(self.value)
+
+
+class SpecialTile(Tile):
+    """Represents any non-numeric Mahjong tile."""
+    pass
+
+
+def make_tile(name, symbol):
+    if name.split('-', 1)[0] in ('characters', 'circles', 'bamboo'):
+        return NumericTile(name, symbol)
+    else:
+        return SpecialTile(name, symbol)
+
+
+tile_names = {name: make_tile(name, symbol)
+              for name, symbol in raw_tiles.items()}
+tile_symbols = {tile.symbol: tile for tile in tile_names.values()}
+tiles = {tile: name for name, tile in tile_names.items()}
 
 deck = (
-    [tile for tile in tiles.keys() if not tile.startswith('flower')] * 4
-    # + [tile for tile in tiles.keys() if tile.startswith('flower')]
+    [tile for tile in tile_names.values() if tile.suite != 'flower'] * 4
+    + [tile for tile in tile_names.values() if tile.suite == 'flower']
 )
 
 winds = ['east', 'south', 'west', 'north']
+
+
+def serialize(hand):
+    """Serializes a list of tiles into a list of tile codes."""
+    return [tiles.get(tile) for tile in hand]
+
+
+def deserialize(hand):
+    """Deserializes a list of tile codes into a list of tiles."""
+    return [tile_names.get(name) for name in hand]

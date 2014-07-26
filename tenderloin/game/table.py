@@ -5,7 +5,11 @@ import random
 
 from tornado.ioloop import PeriodicCallback
 
-from tenderloin.game.resources import tiles, reverse_tiles, deck, winds
+from tenderloin.game.resources import (
+    deck, winds,
+    serialize,
+    tile_symbols,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -125,14 +129,14 @@ class Table(object):
 
     def send_info(self, username):
         """Tells a player about their hand and wind."""
-        hand = sorted(self.game.players[username].hand, key=tiles.get)
+        hand = sorted(self.game.players[username].hand)
         self._send_message('info', username, {
             'players': [{
                 'username': player.username,
                 'wind': player.wind,
             } for player in self.game.players.values()],
-            'hand': hand,
-            'unicode': [tiles[tile] for tile in hand],
+            'hand': serialize(hand),
+            'unicode': [tile.symbol for tile in hand],
             'turn_time': self.turn_time,
         })
 
@@ -166,15 +170,15 @@ class Table(object):
 
     def broadcast_draw(self, username, tile):
         self._send_message('draw', username, {
-            'tile': tile,
-            'unicode': tiles[tile],
+            'tile': tile.code,
+            'unicode': tile.symbol,
         })
 
     def broadcast_discard(self, username, tile):
         self._broadcast_message('discard', {
             'username': username,
-            'tile': tile,
-            'unicode': tiles[tile],
+            'tile': tile.code,
+            'unicode': tile.symbol,
         })
 
     # Message receiving
@@ -194,7 +198,7 @@ class Table(object):
 
     def handle_discard(self, username, message):
         # XXX: Eventually David will send me the ascii-code for the tile
-        tile = reverse_tiles[message['tile']]
+        tile = tile_symbols[message['tile']]
 
         try:
             self.game.discard_tile(tile)
