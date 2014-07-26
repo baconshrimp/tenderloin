@@ -206,7 +206,7 @@ class Table(object):
             return
 
         self.broadcast_discard(username, tile)
-        self.end_turn()
+        self.end_turn(force_discard=False)
 
     # Game state
 
@@ -257,11 +257,18 @@ class Table(object):
         self.can_discard = True
         self.turn_timer.start()
 
-    def end_turn(self):
+    def end_turn(self, force_discard=True):
         """Ends the current player's turn."""
         self.turn_timer.stop()
-        self.broadcast_turn_end(self.game.current_player.username)
         self.can_discard = False
+
+        if force_discard:
+            current = self.game.current_player
+            tile = current.hand[-1]
+            self.game.discard_tile(tile)
+            self.broadcast_discard(current.username, tile)
+
+        self.broadcast_turn_end(self.game.current_player.username)
         if self.game.deck:
             self.start_pick()
         else:
