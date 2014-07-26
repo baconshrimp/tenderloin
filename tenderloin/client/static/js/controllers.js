@@ -33,6 +33,7 @@
             $scope.$apply(function() {
               $scope.game = true;
               $scope.game_id = id;
+              $scope.discarded = [];
             });
 
             $scope.discard = function(tile) {
@@ -45,7 +46,6 @@
 
           ws.onmessage = function(ev) {
             var data = JSON.parse(ev.data);
-            console.log('from game: ', data);
             $scope.$apply(function() {
               var index;
 
@@ -55,9 +55,21 @@
               if (data.type === 'draw') {
                 $scope.hand.push(data.unicode);
               }
-              if (data.type === 'discard' && data.username === User.username) {
-                index = _.findIndex($scope.hand, data.unicode);
-                $scope.hand.splice(index, 1);
+              if (data.type === 'end_turn') {
+                $scope.cur_turn = false;
+              }
+              if (data.type === 'start_turn') {
+                $scope.cur_turn = data.username;
+              }
+              if (data.type === 'discard') {
+                if (data.username === User.username) {
+                  index = $scope.hand.indexOf(data.unicode);
+                  $scope.hand.splice(index, 1);
+                }
+                $scope.discarded.push({
+                  tile: data.unicode,
+                  username: data.username
+                });
               }
             });
           };

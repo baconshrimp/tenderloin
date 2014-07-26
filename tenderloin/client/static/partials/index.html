@@ -9,9 +9,20 @@
 </form>
 
 <h2 ng-if="User.username" ng-bind="User.username"></h2>
-
+<p ng-show="!cur_turn">It is no one's turn right now.</p>
+<p ng-show="cur_turn">It is {{cur_turn}}'s right now!</p>
 <div ng-show="game">
   <h2>Game, id: {{game_id}}</h2>
+
+  <div ng-show="discarded">
+    <h3>Discarded</h3>
+    <ul>
+      <li
+        ng-repeat="tile in discarded track by $index"
+        title="{{tile.username}} discarded this shit"
+        class="tile">{{tile.tile}}</li>
+    </ul>
+  </div>
   <div ng-show="hand">
     <h3>Hand</h3>
     <ul>
