@@ -45,16 +45,19 @@
 
           ws.onmessage = function(ev) {
             var data = JSON.parse(ev.data);
+            console.log('from game: ', data);
             $scope.$apply(function() {
+              var index;
+
               if (data.type === 'info') {
                 $scope.hand = data.unicode;
               } else if (data.type === 'draw') {
                 $scope.hand.push(data.unicode);
               } else if (data.type === 'discard') {
-                console.log(data);
+                index = _.findIndex($scope.hand, data.unicode);
+                $scope.hand = $scope.hand.splice(index, 1);
               }
             });
-            console.log('from game: ', data);
           };
         }).call(_, data.id);
       }
