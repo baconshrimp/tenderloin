@@ -45,16 +45,15 @@
 
           ws.onmessage = function(ev) {
             var data = JSON.parse(ev.data);
-            if (data.type === 'info') {
-              $scope.$apply(function() {
+            $scope.$apply(function() {
+              if (data.type === 'info') {
                 $scope.hand = data.unicode;
-              });
-            }
-            else if (data.type === 'draw') {
-              $scope.$apply(function() {
+              } else if (data.type === 'draw') {
                 $scope.hand.push(data.unicode);
-              });
-            }
+              } else if (data.type === 'discard') {
+                console.log(data);
+              }
+            });
             console.log('from game: ', data);
           };
         }).call(_, data.id);

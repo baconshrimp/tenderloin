@@ -42,8 +42,15 @@
     });
   });
 
-  this.run(function($rootScope, $location) {
-    $rootScope.$on('$login', function() {
+  this.run(function($rootScope, $location, User) {
+    $rootScope.User = User;
+
+    User.getUsername().then(function(data) {
+      User.username = data.username;
+    });
+
+    $rootScope.$on('$login', function(ev, username) {
+      User.username = username;
     });
 
     $rootScope.$on('$routeChangeStart', function() {

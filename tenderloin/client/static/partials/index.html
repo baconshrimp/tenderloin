@@ -2,11 +2,13 @@
 
 <p ng-show="opened">socket is open</p>
 
-<form ng-submit="User.login(username, password)">
+<form ng-if="!User.username" ng-submit="User.login(username, password)">
   <input placeholder="Username" ng-model="username">
   <input placeholder="Password" ng-model="password" type="password">
   <input value="Login" type="submit">
 </form>
+
+<h2 ng-if="User.username" ng-bind="User.username"></h2>
 
 <div ng-show="game">
   <h2>Game, id: {{game_id}}</h2>
