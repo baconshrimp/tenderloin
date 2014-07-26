@@ -51,9 +51,11 @@
 
               if (data.type === 'info') {
                 $scope.hand = data.unicode;
-              } else if (data.type === 'draw') {
+              }
+              if (data.type === 'draw') {
                 $scope.hand.push(data.unicode);
-              } else if (data.type === 'discard') {
+              }
+              if (data.type === 'discard' && data.username === User.username) {
                 index = _.findIndex($scope.hand, data.unicode);
                 $scope.hand.splice(index, 1);
               }
