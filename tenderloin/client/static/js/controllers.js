@@ -55,7 +55,7 @@
                 $scope.hand.push(data.unicode);
               } else if (data.type === 'discard') {
                 index = _.findIndex($scope.hand, data.unicode);
-                $scope.hand = $scope.hand.splice(index, 1);
+                $scope.hand.splice(index, 1);
               }
             });
           };
