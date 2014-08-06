@@ -20,7 +20,7 @@ class TableHandler(helper.TenderloinWebSocketHandler):
     @helper.requires_authentication
     def open(self, tid):
         self.table = self.table_service.get(int(tid))
-        self.table.add_client(self.username, self)
+        self.table.add_client(self.username, self.write_message)
 
         if self.table.can_start():
             self.table.start_game()
@@ -30,4 +30,4 @@ class TableHandler(helper.TenderloinWebSocketHandler):
         self.table.handle(self.username, message)
 
     def on_close(self):
-        self.table.remove_client(self.username, self)
+        self.table.remove_client(self.username, self.write_message)

@@ -5,6 +5,7 @@ import random
 
 from tornado.ioloop import PeriodicCallback
 
+from tenderloin.game.ai import Bot
 from tenderloin.game.resources import (
     deck, winds,
     serialize,
@@ -70,6 +71,12 @@ class Game(object):
 
 class TableService(object):
 
+    BOT_NAMES = [
+        'Jon Snow',
+        'Tobias Fünke',
+        'Maurice Moss',
+    ]
+
     def __init__(self):
         self.tables = []
 
@@ -77,9 +84,15 @@ class TableService(object):
         return self.tables[tid]
 
     def create(self, usernames):
-        tid = len(self.tables)
-        self.tables.append(Table(tid, usernames))
-        return tid
+        bots = self.BOT_NAMES[:4 - len(usernames)]
+        table = Table(len(self.tables), usernames + bots)
+
+        for username in bots:
+            bot = Bot(username, table.handle)
+            table.add_client(username, bot.on_message)
+        self.tables.append(table)
+
+        return table.tid
 
 
 class Table(object):
@@ -117,13 +130,13 @@ class Table(object):
             'username': username,
         })
         for listener in self.listeners[username]:
-            listener.write_message(message)
+            listener(message)
 
     def _broadcast_message(self, type_, message):
         """Send a message to all listeners on any username."""
         message.update({'type': type_})
         for listener in itertools.chain(*self.listeners.values()):
-            listener.write_message(message)
+            listener(message)
 
     # Message sending
 
@@ -243,11 +256,12 @@ class Table(object):
 
     def start_turn(self, draw=True):
         """Start the next player's turn."""
-        logger.info('Table %s: starting turn %s',
-                    self.tid,
-                    self.turn_number)
-
         username = self.game.next_turn()
+
+        logger.info('Table %s: starting turn %s, %s',
+                    self.tid,
+                    self.turn_number,
+                    username)
         self.broadcast_turn_start(username)
 
         if draw:

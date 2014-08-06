@@ -53,15 +53,14 @@ class ChatHandler(helper.TenderloinWebSocketHandler):
         self.chatroom.clients.add(self)
         self.chatroom.send_join(self.username)
 
-        if len(self.chatroom.clients) == 4:
-            tid = self.table_service.create([
-                client.username for client in self.chatroom.clients
-            ])
-            self.chatroom.broadcast({
-                'type': 'new_game',
-                'id': tid,
-            })
-            logger.info('Starting new table with id=%s', tid)
+        tid = self.table_service.create([
+            client.username for client in self.chatroom.clients
+        ])
+        self.chatroom.broadcast({
+            'type': 'new_game',
+            'id': tid,
+        })
+        logger.info('Starting new table with id=%s', tid)
 
     def on_close(self):
         self.chatroom.clients.remove(self)
