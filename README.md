@@ -1,5 +1,7 @@
 # tenderloin
 
+A web-based multiplayer Mahjong client and server.
+
 
 ## Running it locally
 
@@ -16,4 +18,4 @@ docker build -t="tenderloin" .
 docker run -d -p 8000:8000 tenderloin
 ```
 
-Then navigate to [http://dockerhost:8000][].
+Then navigate to [http://dockerhost:8000]().
