@@ -1,12 +1,9 @@
-import functools
-
-
 class Bot(object):
     """Basic Mahjong AI"""
 
     def __init__(self, username, send_message):
         self.username = username
-        self.send_message = functools.partial(send_message, username)
+        self.send_message = send_message
 
         # Game state
         self.hand = []
@@ -14,7 +11,8 @@ class Bot(object):
 
     def on_message(self, message):
         """Called when the bot receives a message."""
-        if message['type'] == 'info':
-            self.hand = message['hand']
-        elif message['type'] == 'discard':
-            self.discards.append(message['tile'])
+        if message['type'] == 'draw':
+            self.send_message({
+                'type': 'discard',
+                'tile': message['unicode'],
+            })

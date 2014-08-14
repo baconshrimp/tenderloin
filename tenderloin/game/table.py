@@ -1,9 +1,10 @@
 import collections
+import functools
 import itertools
 import logging
 import random
 
-from tornado.ioloop import PeriodicCallback
+from tornado.ioloop import IOLoop, PeriodicCallback
 
 from tenderloin.game.ai import Bot
 from tenderloin.game.resources import (
@@ -88,7 +89,10 @@ class TableService(object):
         table = Table(len(self.tables), usernames + bots)
 
         for username in bots:
-            bot = Bot(username, table.handle)
+            handle = functools.partial(IOLoop.current().add_callback,
+                                       table.handle,
+                                       username)
+            bot = Bot(username, handle)
             table.add_client(username, bot.on_message)
         self.tables.append(table)
 
