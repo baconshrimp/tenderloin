@@ -69,6 +69,30 @@ class Game(object):
         self.current_player = self.players[username]
         return username
 
+    def compute_choices(self, tile):
+        """Figures out if any player can make any melds with a tile.
+
+        Yields: username, kong, pong, chows
+
+        """
+        possible_chows = [
+            [tile.next(1), tile.next(2)],
+            [tile.prev(1), tile.next(1)],
+            [tile.prev(2), tile.prev(1)],
+        ]
+
+        for player in self.players.values():
+            if self.current_player == player:
+                continue
+
+            # TODO: Make these checks more efficient
+            kong = [tile] * 4 if player.hand.count(tile) == 3 else []
+            pong = [tile] * 3 if player.hand.count(tile) >= 2 else []
+            chows = [sorted(chow + [tile]) for chow in possible_chows
+                     if chow[0] in player.hand and chow[1] in player.hand]
+
+            yield player.username, kong, pong, chows
+
 
 class TableService(object):
 
@@ -156,6 +180,17 @@ class Table(object):
             'unicode': [tile.symbol for tile in hand],
             'turn_time': self.turn_time,
         })
+
+    def send_pick_choices(self):
+        tile = self.game.discards[-1][1]
+        for username, kong, pong, chows in self.game.compute_choices(tile):
+            self._send_message('pick_choices', username, {
+                'tile': tile.code,
+                'unicode': tile.symbol,
+                'kong': serialize(kong),
+                'pong': serialize(pong),
+                'chows': [serialize(chow) for chow in chows],
+            })
 
     def broadcast_info(self):
         for username in self.listeners:
@@ -247,6 +282,7 @@ class Table(object):
                     self.tid,
                     self.turn_number)
         self.broadcast_pick_start()
+        self.send_pick_choices()
         self.pick_timer.start()
 
     def end_pick(self):

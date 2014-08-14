@@ -56,10 +56,18 @@ class Tile(object):
         return hash(self.symbol)
 
     def __eq__(self, other):
-        return self.symbol == other.symbol
+        return other is not None and self.symbol == other.symbol
 
     def __lt__(self, other):
-        return self.symbol < other.symbol
+        return other is not None and self.symbol < other.symbol
+
+    def prev(self, num=1):
+        """Returns the previous ordered tile if applicable."""
+        return None
+
+    def next(self, num=1):
+        """Returns the next ordered tile if applicable."""
+        return None
 
 
 class NumericTile(Tile):
@@ -68,6 +76,14 @@ class NumericTile(Tile):
     def __init__(self, code, symbol):
         super(NumericTile, self).__init__(code, symbol)
         self.value = int(self.value)
+
+    def prev(self, num=1):
+        """Returns the previous ordered tile if applicable."""
+        return tile_names.get('{}-{}'.format(self.suite, self.value - num))
+
+    def next(self, num=1):
+        """Returns the next ordered tile if applicable."""
+        return tile_names.get('{}-{}'.format(self.suite, self.value + num))
 
 
 class SpecialTile(Tile):
